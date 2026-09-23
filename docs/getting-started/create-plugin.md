@@ -1,201 +1,251 @@
----
-lang: en-US
-title: Create Acode Plugin
----
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Love Heart Animation</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.heart {
+    position: relative;
+    width: 320px;
+    height: 300px;
+    filter: drop-shadow(0 0 8px #ff9fc7);
+}
+
+/* Текст по контуру сердца */
+.word {
+    position: absolute;
+    color: #ea80b0;
+    font-size: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    letter-spacing: 2px;
+    text-shadow:
+        0 0 5px #ffb6d5,
+        0 0 10px #ea80b0;
+    animation: glow 1.8s infinite alternate;
+}
+
+/* Свечение */
+@keyframes glow {
+    from {
+        opacity: .65;
+        text-shadow:
+            0 0 3px #ffb6d5,
+            0 0 7px #ea80b0;
+    }
+
+    to {
+        opacity: 1;
+        text-shadow:
+            0 0 8px #fff,
+            0 0 15px #ff80b5;
+    }
+}
+
+/* Движение каждого слоя */
+.layer1 {
+    animation: move1 5s linear infinite;
+}
+
+.layer2 {
+    animation: move2 6s linear infinite;
+}
+
+.layer3 {
+    animation: move3 7s linear infinite;
+}
+
+@keyframes move1 {
+    from {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(8px);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes move2 {
+    from {
+        transform: translateY(8px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+    to {
+        transform: translateY(8px);
+    }
+}
 
-# Create Acode Plugin
+@keyframes move3 {
+    from {
+        transform: translateY(-5px);
+    }
+    50% {
+        transform: translateY(10px);
+    }
+    to {
+        transform: translateY(-5px);
+    }
+}
 
-## Overview
+/* Текстовая надпись сверху */
+.title {
+    position: absolute;
+    top: 50px;
+    color: white;
+    font-size: 25px;
+    font-weight: bold;
+}
 
-Acode opens up a world of possibilities with its extensibility through plugins. In this guide, you'll learn how to create plugins using JavaScript, with the added option of TypeScript. Whether you're customizing your coding experience or adding entirely new features, creating plugins for Acode is a straightforward and rewarding process.
+.title span {
+    color: #f18bb8;
+}
+</style>
+</head>
 
-## Plugin Structure
+<body>
 
-Acode plugins follow a specific structure within a zip file. The necessary components include:
+<div class="container">
 
-1. **plugin.json:**
+    <div class="title">
+        <span>Love Heart</span> Animation
+    </div>
 
-   - Contains crucial information about the plugin, such as its name, version, author, and more.
+    <div class="heart" id="heart"></div>
 
-2. **main.js:**
+</div>
 
-   - The heart of the plugin, this file contains the actual plugin code.
+<script>
 
-3. **readme.md:**
-   - Contains the description or about plugin
+const heart = document.getElementById("heart");
 
-3. **changelogs.md:**
-   - contains changelogs of your plugin updates.
+/*
+    Формула сердца.
+    Создаём несколько линий из текста "I love you".
+*/
 
-## Plugin Templates
+const layers = 9;
 
-To make your journey smoother, we provide comprehensive plugin templates, which are preconfigured and catering to various use cases:
+for (let layer = 0; layer < layers; layer++) {
 
-1. **[JavaScript Template](https://github.com/Acode-Foundation/acode-plugin)** <Badge type="tip" text="official" /> : Javascript based template for plugin development and comes preconfigured
+    const group = document.createElement("div");
 
-2. **[TypeScript Template](https://github.com/Acode-Foundation/AcodeTSTemplate)** <Badge type="tip" text="official" /> : Typescript template for plugin development and comes with type checking and all typescript feature
+    group.className = "word layer" + ((layer % 3) + 1);
 
-## Getting Started
+    /*
+      Создаём много надписей.
+    */
 
-1.  **Clone the Plugin Template:**
+    for (let i = 0; i < 90; i++) {
 
-    - Choose the template that suits your needs and clone it.
+        const text = document.createElement("span");
 
-2.  **Customize plugin.json:**
+        text.textContent = "I love you ";
 
-    - Open the `plugin.json` file and update it with your plugin's information.
+        /*
+          Параметр сердца.
+        */
 
-3.  **Install the dependency:**
+        const t = (i / 90) * Math.PI * 2;
 
-    - Install the required dependency by your package manager but first navigate to the plugin template folder by `cd acode-template`
+        /*
+          Классическая параметрическая формула сердца.
+        */
 
-    ::: code-group
-    ```sh [npm]
-    $ npm install
-    ```
+        const x =
+            16 * Math.pow(Math.sin(t), 3);
 
-    ```sh [pnpm]
-    $ pnpm install
-    ```
+        const y =
+            -(13 * Math.cos(t)
+            - 5 * Math.cos(2*t)
+            - 2 * Math.cos(3*t)
+            - Math.cos(4*t));
 
-    ```sh [yarn]
-    $ yarn install
-    ```
+        /*
+          Разные размеры слоёв.
+        */
 
-    ```sh [bun]
-    $ bun install
-    ```
-    :::
+        const scale = 8 + layer * 1.5;
 
-4.  **Develop Locally:**
+        const posX = 160 + x * scale;
+        const posY = 145 + y * scale;
 
-    - Use given commands to initiate a development server that watches for changes.
-    - The development server automatically creates a plugin zip file, ready for installation.
-    
-    ::: code-group
-    ```sh [npm]
-    $ npm run dev
-    ```
+        /*
+          Направление текста по контуру.
+        */
 
-    ```sh [pnpm]
-    $ pnpm dev
-    ```
+        const nextT = t + 0.03;
 
-    ```sh [yarn]
-    $ yarn dev
-    ```
+        const nextX =
+            16 * Math.pow(Math.sin(nextT), 3);
 
-    ```sh [bun]
-    $ bun run dev
-    ```
-    :::
+        const nextY =
+            -(13 * Math.cos(nextT)
+            - 5 * Math.cos(2*nextT)
+            - 2 * Math.cos(3*nextT)
+            - Math.cos(4*nextT));
 
-    - Or you can build every time manually on changes using(this will build production build):
+        const angle =
+            Math.atan2(
+                nextY - y,
+                nextX - x
+            ) * 180 / Math.PI;
 
-    ::: code-group
-    ```sh [npm]
-    $ npm run build
-    ```
+        text.style.position = "absolute";
+        text.style.left = posX + "px";
+        text.style.top = posY + "px";
 
-    ```sh [pnpm]
-    $ pnpm build
-    ```
+        text.style.transform =
+            `translate(-50%, -50%) rotate(${angle}deg)`;
 
-    ```sh [yarn]
-    $ yarn build
-    ```
+        /*
+          Немного разный размер,
+          чтобы получилось как на видео.
+        */
 
-    ```sh [bun]
-    $ bun run build
-    ```
-    :::
+        text.style.fontSize =
+            (11 + layer * 0.6) + "px";
 
-5.  **Install the Plugin:**
+        text.style.opacity =
+            0.45 + layer * 0.06;
 
-    - Use the **REMOTE** option in Acode's plugin manager.
-    - This option is available on both sidebar extension tab or on Plugin page from settings.
-    - Provide the plugin URL (e.g., `http://\<ip\>:3000/dist.zip`) when prompted.
-    - Or if you are building manually then you can use the **Local** option in Acode's plugin manager and select the plugin zip
+        group.appendChild(text);
+    }
 
-:::info
-Development server will only build the zip on file changes
-:::
+    heart.appendChild(group);
+}
 
-:::tip 
-For local development, start a dev server using `npm run dev`. In Acode, use the **Remote** option, either from the **sidebar** or the **plugin page**. Enter the server URL, hit **Install**, and the plugin will be installed.  
+</script>
 
-It's more convenient to manage this from the sidebar. When you install a local plugin(either using url or selecting the zip), Acode will add a **reload** icon in the **Extensions** tab of the sidebar. This is useful because the server automatically builds the plugin ZIP when changes are made. Simply press the reload button to apply the latest changes instantly.  
-
-This makes plugin development a much smoother experience—previously, it was quite frustrating, but this feature was recently added to improve the workflow.
-:::
-
-## Creating Plugins with the CLI<Badge type="warning" text="community" />
-
-You can also quickly scaffold new Acode plugins using the [Acode Plugin CLI](https://github.com/itsvks19/acode-plugin-cli). This tool provides an interactive wizard to generate a plugin project from the official JavaScript or TypeScript templates.
-
-### Installation
-
-If you have Rust installed, you can install the CLI with:
-
-```bash
-cargo install acode-plugin-cli
-```
-
-### Usage
-
-Run the CLI in your terminal:
-
-```bash
-acode-plugin-cli
-```
-
-The wizard will guide you to:
-
-- Choose plugin name, ID, version, and description
-- Enter author information
-- Pick license and keywords
-- Select JavaScript or TypeScript template
-
-After completion, your plugin folder will be ready to use.
-
-## Building and Publishing
-
-To share your plugin with the Acode community, follow these steps:
-
-1. **Bundle for production:**
-
-   - Use `build` command to create a production build. which will be lower in size
-
-   ::: code-group
-
-    ```sh [npm]
-    $ npm run build
-    ```
-
-    ```sh [pnpm]
-    $ pnpm build
-    ```
-
-    ```sh [yarn]
-    $ yarn build
-    ```
-
-    ```sh [bun]
-    $ bun run build
-    ```
-
-2. **Publish:**
-
-   - Publish your release build on [Acode's](https://acode.app) official website, making your plugin accessible to the broader community.
-
-   - Tutorial for publishing a plugin : [Youtube](https://youtube.com/shorts/cxF2pxyN1HM?si=kQ5_BRtIO2RU-zhb)
-
-## Tutorial
-
-- Checkout a small tutorial of 👉 [How to create Acode Plugins?](https://youtu.be/ls--txHX3RQ?si=ZSvJMsb1KFeQA8zd)
-
-## Customization
-
-Certainly! You have the flexibility to either utilize your own template or start your plugin from scratch. Additionally, you're free to employ alternative bundlers and tools. We'll delve deeper into these customization possibilities in subsequent sections.
-
-Happy coding, and may your plugins bring new dimensions to your Acode experience! 🚀✨
+</body>
+</html>
